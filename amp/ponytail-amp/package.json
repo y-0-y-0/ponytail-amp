@@ -1,0 +1,14 @@
+{
+  "name": "ponytail-amp",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Independent experimental Ponytail directory plugin for Amp",
+  "repository": "https://github.com/y-0-y-0/ponytail-amp",
+  "upstream": {
+    "repository": "https://github.com/DietrichGebert/ponytail",
+    "version": "5.3.2",
+    "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710"
+  }
+}

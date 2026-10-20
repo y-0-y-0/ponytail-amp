@@ -13,21 +13,22 @@ test('root npm test covers bundled subprojects', () => {
   assert.match(packageJson.scripts.test, /npm test --prefix pi-extension/);
 });
 
-test('publishing gates OIDC access on tests and pins executable dependencies', () => {
+test('fork cannot publish the upstream npm identity and workflows pin actions', () => {
   const publish = fs.readFileSync(path.join(root, '.github', 'workflows', 'publish.yml'), 'utf8').replace(/\r\n/g, '\n');
   const ci = fs.readFileSync(path.join(root, '.github', 'workflows', 'test.yml'), 'utf8').replace(/\r\n/g, '\n');
+  const amp = fs.readFileSync(path.join(root, '.github', 'workflows', 'amp.yml'), 'utf8');
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
+  assert.equal(metadata.private, true);
   assert.match(ci, /^  workflow_call:$/m);
-  assert.doesNotMatch(ci, /^    tags:/m, 'tag tests are run by the publishing workflow');
-  assert.match(publish, /^  test:\n    uses: \.\/\.github\/workflows\/test\.yml$/m);
-  assert.match(publish, /^  publish:\n    needs: test$/m);
+  assert.match(publish, /uses: \.\/\.github\/workflows\/amp\.yml/);
+  assert.doesNotMatch(publish, /\bpush:|\btags:/);
   assert.match(publish, /^permissions:\n  contents: read\n\n/m);
-  assert.match(publish, /^    permissions:\n      contents: read\n      id-token: write$/m);
-  assert.equal((publish.match(/^\s*id-token:/gm) || []).length, 1);
-  assert.doesNotMatch(ci, /id-token:/);
-  assert.match(publish, /npm install -g npm@\d+\.\d+\.\d+(?:\r?\n|$)/);
+  assert.match(amp, /npm --prefix amp run typecheck/);
+  assert.match(amp, /npm --prefix amp test/);
 
-  for (const workflow of [publish, ci]) {
+  for (const workflow of [publish, ci, amp]) {
+    assert.doesNotMatch(workflow, /id-token:|npm publish|gh release|contents: write|pull_request_target|secrets\./);
     for (const action of workflow.matchAll(/^\s+- uses: (.+)$/gm)) {
       assert.match(action[1], /^actions\/[\w-]+@[a-f0-9]{40} # v\d+\.\d+\.\d+\r?$/);
     }
