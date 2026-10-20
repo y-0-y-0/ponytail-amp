@@ -2,7 +2,7 @@
 
 **Ponytail Amp** is an independent, experimental Amp plugin fork of the Ponytail development-guidance project. Its confirmed public distribution name is `ponytail-amp`; the first alpha is `0.1.0-alpha.1`.
 
-This is not an official Amp product, an official Ponytail release, or affiliated with Sourcegraph, Amp, or Dietrich Gebert. The source fork is [y-0-y-0/ponytail-amp](https://github.com/y-0-y-0/ponytail-amp). It was based on upstream [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) 5.3.2 at commit `09c434ab73ca43761c5d8b0c5d341926c2fba710`. On 2026-10-20, the fork's `origin` and upstream HEADs were verified to be at that same commit. Upstream author and license attribution remain: Dietrich Gebert, MIT; see [LICENSE](LICENSE).
+This is not an official Amp product, an official Ponytail release, or affiliated with Sourcegraph, Amp, or Dietrich Gebert. The source fork is [y-0-y-0/ponytail-amp](https://github.com/y-0-y-0/ponytail-amp). It was based on upstream [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) 5.3.2 at commit `09c434ab73ca43761c5d8b0c5d341926c2fba710`. Before the Amp port on 2026-10-20, the fork's `origin` and upstream HEADs were verified to be at that same commit. Upstream author and license attribution remain: Dietrich Gebert, MIT; see [LICENSE](LICENSE).
 
 > **Experimental pre-release, not a stable release.** Installation from the archive, real Amp loading, six-skill discovery, a coding regression and known-defect review have been exercised. Authenticated CLI interface tests also passed for palette level changes, `off`, two interleaved threads and plugin reload. No release or package has been published.
 

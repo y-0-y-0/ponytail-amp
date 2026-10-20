@@ -4,7 +4,7 @@
 
 The tested local environment is Linux x64 (GitHub Codespace), Node 24.21.0, GNU tar 1.35 and Amp CLI `0.0.1792470027-g8c393d` on 2026-10-20. No macOS, Windows, orb, or hosted personal/workspace installation claim is made.
 
-| Layer | Local result |
+| Layer | Observed result |
 |---|---|
 | Unit | Two tests: three intensities/off, independent thread state and replay IDs. |
 | Simulated host contract | Four tests: six registrations, both palette controls, transitions, no active thread, cancellation, async thread isolation, off and reload. Unexpected host capabilities throw. |
@@ -13,7 +13,7 @@ The tested local environment is Linux x64 (GitHub Codespace), Node 24.21.0, GNU 
 | Authenticated CLI | Archive installed in a fresh Git project; plugin/listener/two commands listed; all six qualified skill lookups pass; automatic full guidance, coding regression and known-defect review exercised. |
 | Authenticated interactive UI | Real CLI TUI, driven through a PTY: all four levels, no-thread commands, two interleaved threads, explicit help in off, hidden injection and plugin reload pass. Web UI and identical-event replay were not exercised. |
 | Other hosts | Root: 144/144 and Pi: 30/30 pass after supplying the existing CI dependency pandas in an isolated test venv. Rule copies, version consistency and agentic benchmark selftest pass. |
-| GitHub CI | Workflows prepared; source commit/push authorized. Remote results must be checked for the exact pushed commit before reporting success. |
+| GitHub CI | Both native Amp and inherited test workflows passed for the native-port commit; exact run links and environment follow below. |
 
 The exported authenticated coding thread contains exactly one automatic `[Ponytail Amp — level: full]` text block with `hidden: true` in its first user message, and records `ponytail-amp:ponytail-review` in activated skills. The task fixed only the scratch copy of `shipping.mjs` (`> 50` → `>= 50`) and passed the unchanged boundary test. It identified a concrete arithmetic-mean failure, without modifying the review fixture. These are functional smoke checks, not evidence of cost or quality gains. Single-platform coverage and the remaining scope limits keep this an experimental pre-release.
 
@@ -45,8 +45,21 @@ APIs and must not be described as a real UI replay test.
 The first root test run failed because pandas was absent, not because of an Amp
 change. Repeating it with Python 3.14.2 and pandas 3.0.6 in a disposable venv
 passed all 174 root/Pi tests; no project dependency or global Python installation
-was changed. The inherited CI uses Python 3.12 and installs pandas itself; that
-remote environment has not been executed for this fork's changes.
+was changed. The inherited CI then passed on Ubuntu 24.04.5 with Node 22.23.3,
+Python 3.12.15 and pandas 3.0.6. The native Amp CI used Node 24.21.0.
+
+## Remote CI results — 2026-10-20
+
+For the native-port commit
+[`a5a8738`](https://github.com/y-0-y-0/ponytail-amp/commit/a5a873830a14096d43a0f575a585f8cde5e6fdc3),
+both [Amp CI](https://github.com/y-0-y-0/ponytail-amp/actions/runs/39389446047)
+and [inherited CI](https://github.com/y-0-y-0/ponytail-amp/actions/runs/39389446039)
+completed successfully. Amp CI ran the strict type check, all seven Amp tests,
+archive build and workflow-artifact upload without Amp credentials. Inherited
+CI passed all 144 root and 30 Pi tests, rule-copy/version checks and the agentic
+benchmark selftest. This is an observation for that exact source commit, not a
+claim that later commits pass; check Actions for the exact publication candidate.
+Workflow artifacts are not a public release or a package publication.
 
 ## Automated checks
 
