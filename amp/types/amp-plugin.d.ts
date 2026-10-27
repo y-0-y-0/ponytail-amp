@@ -419,19 +419,6 @@ declare module '@ampcode/plugin' {
 		/** Optional reasoning effort override for models that support it. */
 		reasoningEffort?: AgentReasoningEffort
 		/**
-		 * Model and reasoning effort for the Oracle consulted from threads running this
-		 * agent. Omitted fields keep Amp's automatic routing and default effort. An
-		 * unavailable model falls back to Amp's routing at run time.
-		 */
-		oracle?: AgentSubagentPin
-		/**
-		 * Model and reasoning effort for the other subagents spawned from threads running
-		 * this agent (Task workers, finder, thread reader, librarian). Omitted fields keep
-		 * Amp's automatic routing and default effort. An unavailable model falls back to
-		 * Amp's routing at run time.
-		 */
-		subagents?: AgentSubagentPin
-		/**
 		 * Estimated input-token count at which Amp automatically compacts the thread.
 		 * Must be a positive safe integer. When omitted, Amp uses the configured
 		 * percentage threshold, which defaults to 90%.
@@ -451,20 +438,6 @@ declare module '@ampcode/plugin' {
 		 * a `thread.agent()` handle — carry the label.
 		 */
 		display?: AgentDisplay
-	}
-
-	/**
-	 * A model pin for one subagent role of a custom agent: the Oracle or the other subagents.
-	 * Each field overrides independently.
-	 */
-	export interface AgentSubagentPin {
-		/**
-		 * Model identifier in `provider/model` format, such as `anthropic/claude-sonnet-4-6`.
-		 * Omit to keep Amp's automatic model routing for the role.
-		 */
-		model?: PluginAgentModel
-		/** Reasoning effort for the role's model. Omit to keep the role's default effort. */
-		effort?: AgentReasoningEffort
 	}
 
 	/** Display metadata for a plugin agent. */
@@ -1571,6 +1544,36 @@ declare module '@ampcode/plugin' {
 
 		/** Text for the confirm button (default: "Yes") */
 		confirmButtonText?: string
+
+		/**
+		 * Start the dialog collapsed to its title and message with a button of this text, such as
+		 * `'Set Up'`, that expands it to the fields and the confirm and cancel buttons. Use it for a
+		 * dialog the user may want to read before taking on, such as connecting a service with
+		 * several fields. Clients with no collapsed state show the whole dialog at once.
+		 */
+		expandButtonText?: string
+
+		/**
+		 * Markdown shown instead of `message` while the dialog is collapsed, such as a short pitch for
+		 * why the user should go ahead; `message` then holds the details shown with the fields. Only
+		 * used with `expandButtonText`.
+		 */
+		collapsedMessage?: string
+
+		/**
+		 * HTTP or HTTPS URL of a small square image, such as a service's logo, shown before the
+		 * title. Clients without images ignore it.
+		 */
+		iconURL?: string
+
+		/**
+		 * When the user declines this dialog while your tool's `execute` runs, end the agent's turn
+		 * once every tool call in the same batch has finished, instead of letting the agent
+		 * continue. Other calls and their dialogs are not cancelled. Ignored in hooks and commands.
+		 * Use this for approvals the agent must not work around, such as sending an email; do not
+		 * call `ctx.thread.cancel()` on decline, which stops every other call in the turn.
+		 */
+		endTurnOnDecline?: boolean
 	}
 
 	/** A field shown in a confirmation dialog. */
@@ -1579,13 +1582,30 @@ declare module '@ampcode/plugin' {
 		 * How to show the field. Text fields are editable. Image fields show a read-only preview
 		 * of an HTTP(S) image URL. Link fields show a button that opens an HTTP(S) URL in the
 		 * browser, for example an approval page in another app; the dialog stays open so the user
-		 * can still confirm or cancel afterwards. Image and link fields are omitted from the
-		 * returned values. Defaults to `text`.
+		 * can still confirm or cancel afterwards. Attachment fields show a read-only card for the
+		 * file at an HTTP(S) URL, such as an email attachment: its name (`label`), type, and size,
+		 * with a preview where the client can render one. Image, link, and attachment fields are
+		 * omitted from the returned values unless they are `removable`. Defaults to `text`.
 		 *
-		 * When a link field comes before a text field, clients show the fields as numbered steps:
-		 * for example "open the sign-in page", then "paste the URL it ends on".
+		 * File fields take a small text file, such as a key or certificate, and return its text
+		 * in place of a typed value. The web client shows a drop zone that also opens the file
+		 * picker, with an option to paste the text instead; the CLI takes a path on this computer
+		 * or the pasted text. Files larger than 64 KiB or not valid UTF-8 are refused. A file
+		 * field is editable like a text field: it is required unless `optional`, and `secret`
+		 * applies to it.
+		 *
+		 * When a link field comes before an editable field, clients show the fields as numbered
+		 * steps: for example "open the sign-in page", then "paste the URL it ends on". When the
+		 * only field is one link, the user must open it before they can confirm: the primary
+		 * button opens the link, then becomes the confirm button.
 		 */
-		type?: 'text' | 'image' | 'link'
+		type?: 'text' | 'image' | 'link' | 'file' | 'attachment'
+
+		/**
+		 * File extensions a file field's picker offers, such as `['.p8']`. Advisory: the user can
+		 * still drop or paste any text.
+		 */
+		accept?: string[]
 
 		/** Stable key used in the returned record */
 		name: string
@@ -1599,8 +1619,33 @@ declare module '@ampcode/plugin' {
 		/** Allow a text field to span multiple lines */
 		multiline?: boolean
 
+		/**
+		 * Show a single-line text field's label to its left instead of above it, for a compact form
+		 * such as an email's To and Subject. Clients that cannot show it there show it above.
+		 */
+		inlineLabel?: boolean
+
+		/** The MIME type of an attachment field's file, such as `application/pdf`; picks its preview */
+		mimeType?: string
+
+		/** The size in bytes of an attachment field's file, shown on its card */
+		sizeBytes?: number
+
+		/**
+		 * Let the user remove an image or attachment field before confirming, for example an
+		 * attachment they do not want to send. The returned values then include the field: its
+		 * `value` when kept, or an empty string when removed.
+		 */
+		removable?: boolean
+
 		/** Allow a text field to be left empty. Text fields are required unless this is set. */
 		optional?: boolean
+
+		/**
+		 * Hide an optional text field that starts empty behind a small button with its label, such
+		 * as CC on an email, until the user opens it. Clients that cannot collapse fields show it.
+		 */
+		collapsed?: boolean
 
 		/** Placeholder shown in an empty text field */
 		placeholder?: string
@@ -2073,8 +2118,9 @@ declare module '@ampcode/plugin' {
 	/**
 	 * Determines whether an error thrown by `ui.input`, `ui.confirm`, or `ui.select` means the
 	 * dialog could not be shown to anyone, as opposed to being shown and dismissed. This happens
-	 * when the client has no UI (for example `amp -x`) and when the tool was called from inside
-	 * code_exec, which cannot wait for a person. A dismissed dialog never throws; it resolves to
+	 * when the client has no UI (for example `amp -x`) and when the tool was called from a
+	 * code_exec run that cannot wait for a person, such as one inside a subagent. A dismissed
+	 * dialog never throws; it resolves to
 	 * `undefined` or `false`.
 	 */
 	export type IsPluginUINotAvailableError = (error: Error) => boolean
@@ -2174,6 +2220,14 @@ declare module '@ampcode/plugin' {
 
 		/** Current thread context for this tool invocation */
 		thread: PluginThread
+
+		/**
+		 * Aborted when the tool call is cancelled, for example when the user presses Stop. The
+		 * tool's result is discarded after that, but the plugin keeps running, so check it before
+		 * starting an effect that cannot be undone, such as sending a message, and pass it to
+		 * APIs that accept an `AbortSignal`.
+		 */
+		signal: AbortSignal
 	}
 
 	/** A provider-neutral webhook event delivered to a plugin handler. */
@@ -2347,19 +2401,6 @@ declare module '@ampcode/plugin' {
 			  }
 		/** Optional reasoning effort override for models that support it. */
 		reasoningEffort?: AgentReasoningEffort
-		/**
-		 * Model and reasoning effort for the Oracle consulted from threads running this
-		 * agent. Omitted fields keep Amp's automatic routing and default effort. An
-		 * unavailable model falls back to Amp's routing at run time.
-		 */
-		oracle?: AgentSubagentPin
-		/**
-		 * Model and reasoning effort for the other subagents spawned from threads running
-		 * this agent (Task workers, finder, thread reader, librarian). Omitted fields keep
-		 * Amp's automatic routing and default effort. An unavailable model falls back to
-		 * Amp's routing at run time.
-		 */
-		subagents?: AgentSubagentPin
 		/** Features required on threads created from this agent. */
 		features?: readonly AgentFeature[]
 		/**
